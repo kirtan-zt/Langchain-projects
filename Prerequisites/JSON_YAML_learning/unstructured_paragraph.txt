@@ -1,0 +1,6 @@
+Project Name: Operation Aurora
+Lead Researcher: Dr. Elena Vance
+Start Date: 2024-05-12
+Status: Active
+Budget: 500000
+Description: This project explores high-altitude atmospheric energy collection.

@@ -1,0 +1,4 @@
+SYSTEM: You will be provided with a tweet, and your task is to classify its sentiment as positive,
+neutral, or negative.
+
+USER: I loved the new Batman movie!

@@ -1,0 +1,11 @@
+age: 30
+city: New York
+education:
+  degree: Master's
+  field: Computer Science
+  year: 2021
+name: Alice
+skills:
+- Python
+- Data Analysis
+- Machine Learning
