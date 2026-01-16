@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Review agent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <h1>AI Code Review Agent</h1>
+    <div id="chat-container">
+        <div id="chat-messages" style="border:1px solid #ccc; padding:10px; min-height:200px; margin-bottom:10px;">
+            </div>
+        
+        <textarea id="user-input" rows="10" style="width: 100%; font-family: monospace;" 
+                  placeholder="Paste your backend or frontend code here..."></textarea>
+        
+        <br>
+        <button id="send-btn" onclick="sendMessage()">Analyze Code</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        function sendMessage() {
+            var userInput = $('#user-input').val();
+            var btn = $('#send-btn');
+
+            if (userInput.trim() !== '') {
+                btn.prop('disabled', true).text('Analyzing...');
+                $('#chat-messages').append('<p><strong>System:</strong> Analyzing your code, please wait...</p>');
+
+                $.ajax({
+                    url: '{% url "chat" %}',
+                    type: 'POST',
+                    data: { 'message': userInput },
+                    success: function(response) {
+                        var formattedResponse = marked.parse(response.message);
+                        // Render the Markdown
+                        $('#chat-messages').append('<div class="review-block">' + formattedResponse + '</div>');
+    
+                        // Trigger Highlight.js on all <code> blocks
+                        document.querySelectorAll('pre code').forEach((el) => {
+                        hljs.highlightElement(el);
+                         });
+                        btn.prop('disabled', false).text('Analyze Code');
+                    },
+                    error: function() {
+                        alert('Something went wrong.');
+                        btn.prop('disabled', false).text('Analyze Code');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html
