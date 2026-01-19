@@ -18,3 +18,8 @@ class ChatRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ChatResponse(BaseModel):
+    answer: str
+    references: List[str]
+    confidence: float
