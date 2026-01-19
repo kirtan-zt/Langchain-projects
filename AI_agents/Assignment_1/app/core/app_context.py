@@ -1,0 +1,59 @@
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_groq import ChatGroq
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+
+from app.core.config import settings
+from app.services.document import DocumentService
+from app.services.ai import AIService
+from app.services.chat import ChatService
+from app.repositories import DocumentRepository, ChatRepository, MessageRepository
+
+class AppContext:
+    def __init__(self, settings):
+        # Text splitting
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP,
+        )
+
+        # Embeddings 
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name=settings.EMBEDDING_MODEL
+        )
+
+        # Vector store
+        self.vector_store = Chroma(
+            collection_name=settings.vector_store_collection_name,
+            embedding_function=self.embeddings,
+        )
+
+        # Repositories
+        self.document_repository = DocumentRepository()
+        self.chat_repository = ChatRepository()
+        self.message_repository = MessageRepository()
+
+        # Services
+        self.document_svc = DocumentService(
+            document_repository=DocumentRepository(),
+            vector_store=self.vector_store,
+            text_splitter=self.text_splitter,
+        )
+
+        self.llm = ChatGroq(
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            api_key=settings.GROQ_API_KEY,
+        )
+
+        self.ai_svc = AIService(self.llm)
+
+        self.chat_svc = ChatService(
+            chat_repository=self.chat_repository,
+            message_repository=self.message_repository,
+            ai_svc=self.ai_svc,
+            document_svc=self.document_svc,
+        )
+
+def create_app_context() -> AppContext:
+    return AppContext(settings)

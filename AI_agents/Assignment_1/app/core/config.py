@@ -1,0 +1,30 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv 
+
+load_dotenv()
+
+# Configuration settings loaded from the environment/.env file.
+class Settings(BaseSettings):
+    
+    APP_NAME: str = "Enterprise AI Knowledge assistant"
+    ENV_STATE: str = "development"
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+
+    DB_HOST: str
+    DB_PORT: int
+    DB_PASSWORD: str
+    DB_NAME: str
+    DB_USER: str
+
+    SECRET_KEY: str
+    GROQ_API_KEY: str
+
+    # Vector / NLP settings
+    CHUNK_SIZE: int = 1200          
+    CHUNK_OVERLAP: int = 250       
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+
+    vector_store_collection_name: str = "knowledge_base"
+    debug: bool = False
+
+settings = Settings()
