@@ -32,3 +32,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Unnecessary db dump
+db_bin_files/
