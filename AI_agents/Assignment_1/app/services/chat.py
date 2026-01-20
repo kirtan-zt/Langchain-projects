@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from uuid import UUID
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.chat import ChatCreate
 from app.models.chat import Chat
@@ -15,6 +14,7 @@ from app.models.logs import SenderType
 
 @dataclass
 class ChatService:
+    """Business logic for chat model"""
     chat_repository: ChatRepository
     message_repository: MessageRepository
     ai_svc: AIService
@@ -25,6 +25,15 @@ class ChatService:
     session: AsyncSession,
     chat_create: ChatCreate,
 ) -> Chat:
+        """Method to create chat id
+
+        Args:
+            session (AsyncSession): Database instance
+            chat_create (ChatCreate): Request model to store chat id
+
+        Returns:
+            Chat: Dictionary that maps to Chat database 
+        """
         documents = []
 
         if chat_create.document_ids:
@@ -44,6 +53,14 @@ class ChatService:
         self,
         session: AsyncSession,
     ) -> list[Chat]:
+        """Lists all chat ids from the database.
+
+        Args:
+            session (AsyncSession): Database instance.
+
+        Returns:
+            list[Chat]: A JSON array of chat objects
+        """
         return await self.chat_repository.find_all(session)
 
     async def send_message(
@@ -52,6 +69,19 @@ class ChatService:
         chat_id: UUID,
         message_create: MessageCreate,
     ) -> Message:
+        """Method to send prompt to LLM from the user.
+
+        Args:
+            session (AsyncSession): Database instance.
+            chat_id (UUID): Unique chat id
+            message_create (MessageCreate): Request model object
+
+        Raises:
+            ValueError: Chat id validation check
+
+        Returns:
+            Message: LLM response for the given question
+        """
         
         chat = await self.chat_repository.get_by_id(session, chat_id)
         if chat is None:
@@ -96,5 +126,13 @@ class ChatService:
         session: AsyncSession,
         chat_id: UUID,
     ) -> list[Message]:
-        
+        """Lists all messages in the conversation.
+
+        Args:
+            session (AsyncSession): Database instance.
+            chat_id (UUID): Unique chat id
+
+        Returns:
+            list[Message]: A JSON array of message objects.
+        """
         return await self.message_repository.find_by_chat_id(session, chat_id)

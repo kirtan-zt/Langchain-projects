@@ -2,7 +2,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-
 from app.core.config import settings
 from app.services.document import DocumentService
 from app.services.ai import AIService
@@ -10,6 +9,9 @@ from app.services.chat import ChatService
 from app.repositories import DocumentRepository, ChatRepository, MessageRepository
 
 class AppContext:
+    """
+    App context is a single source of initiating embedding models, LLM models, storing repository for models, etc.
+    """
     def __init__(self, settings):
         # Text splitting
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -56,4 +58,9 @@ class AppContext:
         )
 
 def create_app_context() -> AppContext:
+    """Creating an instance of app context class.
+
+    Returns:
+        AppContext: Loads app context object parsed with settings configuration
+    """
     return AppContext(settings)

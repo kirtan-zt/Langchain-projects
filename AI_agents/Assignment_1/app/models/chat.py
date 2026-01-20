@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from uuid import uuid4
 from app.core.base import Base
 
-
 class Chat(Base):
     __tablename__ = "chats"
 

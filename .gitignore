@@ -23,6 +23,7 @@ db.sqlite3-journal
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
+.pytest_cache/
 
 # Environments
 .env
@@ -35,3 +36,5 @@ venv.bak/
 
 # Unnecessary db dump
 db_bin_files/
+embeddings_cohere_5k.npy
+

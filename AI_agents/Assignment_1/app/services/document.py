@@ -10,6 +10,7 @@ from app.models.document import Document
 from app.repositories.document import DocumentRepository
 
 class DocumentService:
+    """Business logic for document model."""
     def __init__(
         self,
         document_repository: DocumentRepository,
@@ -25,6 +26,15 @@ class DocumentService:
         session: AsyncSession,
         document_ids: Sequence[UUID],
     ) -> list[Document]:
+        """Retrieve a specific document by it's ID
+
+        Args:
+            session (AsyncSession): Database instance.
+            document_ids (Sequence[UUID]): List of unique document ids
+
+        Returns:
+            list[Document]: A JSON array of document objects.
+        """
         if not document_ids:
             return []
 
@@ -39,7 +49,19 @@ class DocumentService:
         name: str,
         base_docs: list[LCDocument],
     ) -> Document:
+        """Method to save the document from media.
 
+        Args:
+            db (AsyncSession): Database instance
+            name (str): Name of the document
+            base_docs (list[LCDocument]): Langchain Document.
+
+        Raises:
+            ValueError: Text chunk validation
+
+        Returns:
+            Document: Populates and returns document db model
+        """
         document = Document(
             name=name,
             content=b"",  
@@ -87,6 +109,21 @@ class DocumentService:
         name: str,
         pdf_bytes: bytes,
     ) -> Document:
+        """Method to save document in pdf format.
+
+        Args:
+            db (AsyncSession): Database instance.
+            name (str): Name of document.
+            pdf_bytes (bytes): Immutable sequences of bytes.
+
+        Raises:
+            ValueError: Failed to read the pdf file
+            ValueError: Failed to support encrypted pdf
+            ValueError: Failed to generate text from pdf
+
+        Returns:
+            Document: Populates and returns document db model
+        """
         try:
             reader = PdfReader(io.BytesIO(pdf_bytes))
         except Exception as e:
@@ -130,6 +167,19 @@ class DocumentService:
         name: str,
         text: str,
     ) -> Document:
+        """Method to save document in raw text
+
+        Args:
+            db (AsyncSession): Database instance.
+            name (str): Name of document.
+            text (str): Text content.
+
+        Raises:
+            ValueError: Empty text body
+
+        Returns:
+            Document: Populates and returns document db model
+        """
         if not text.strip():
             raise ValueError("Text content is empty")
         
@@ -155,6 +205,16 @@ class DocumentService:
         file_ids: list[UUID],
         k: int = 5,
     ) -> List[LCDocument]:
+        """Similarity search functionality in ChromaDB vector store
+
+        Args:
+            query (str): User query
+            file_ids (list[UUID]): List of unique document ids
+            k (int, optional): Top-k results. Defaults to 5.
+
+        Returns:
+            List[LCDocument]: A JSON array of documents
+        """
         if not file_ids:
             return []
 
@@ -171,7 +231,15 @@ class DocumentService:
         session: AsyncSession,
         document_id: UUID,
     ) -> None:
+        """Delete service for removing uploaded documents
 
+        Args:
+            session (AsyncSession): Database instance.
+            document_id (UUID): Document id to be deleted
+
+        Raises:
+            ValueError: Failed to find existing document from database.
+        """
         # Check existence
         document = await self.document_repository.get_by_id(
             session,

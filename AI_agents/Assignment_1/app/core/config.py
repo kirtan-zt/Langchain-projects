@@ -5,7 +5,12 @@ load_dotenv()
 
 # Configuration settings loaded from the environment/.env file.
 class Settings(BaseSettings):
-    
+    """
+    Automatically loads settings from various sources, such as environment variables and secrets files, with a defined order of precedence. 
+
+    Args:
+        BaseSettings (class): Automatic source loading
+    """
     APP_NAME: str = "Enterprise AI Knowledge assistant"
     ENV_STATE: str = "development"
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')

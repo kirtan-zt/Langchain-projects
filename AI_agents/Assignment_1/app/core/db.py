@@ -9,11 +9,11 @@ from app.core.base import Base
 from app.models.logs import Message
 import urllib.parse
 
-
 # Encode password safely
 password_encoded = urllib.parse.quote_plus(settings.DB_PASSWORD)
 
 class AsyncDatabaseSession:
+    """Asynchronous database session to store real time input-output query with database."""
     def __init__(self):
         self._engine = None
         self._session_factory: async_sessionmaker[AsyncSession] | None = None
@@ -41,7 +41,7 @@ class AsyncDatabaseSession:
         )
 
     async def create_all(self) -> None:
-        """Create all tables (used at startup, not migrations)."""
+        """Create all tables"""
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
@@ -69,6 +69,15 @@ async def create_log_entry(
     session: AsyncSession,
     log: Message,
 ) -> Message:
+    """Async session to store message logs of past conversations
+
+    Args:
+        session (AsyncSession): database instance.
+        log (Message): Dictionary to store conversation data
+
+    Returns:
+        Message: Message model that stores chat id, content, timestamps, etc.
+    """
     session.add(log)
     await session.commit()
     await session.refresh(log)

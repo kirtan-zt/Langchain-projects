@@ -3,7 +3,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.core.base import Base
 
-
 class Chunk(Base):
     __tablename__ = "document_chunks"
 

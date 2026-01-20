@@ -4,15 +4,12 @@ from datetime import datetime
 from typing import List, Optional
 from enum import Enum
 
-
 class SenderType(str, Enum):
     human = "human"
     ai = "ai"
 
-
 class MessageCreate(BaseModel):
     content: str = Field(description="Message content")
-
 
 class MessageRead(BaseModel):
     id: UUID

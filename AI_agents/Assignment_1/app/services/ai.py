@@ -4,13 +4,13 @@ from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-
 class RAGResult(BaseModel):
+    """Stores structured LLM response for a given question"""
     answer: str
     sources: List[str]
     confidence: float
 
-
+# Prompt template with context ingestion
 RAG_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
@@ -32,6 +32,7 @@ RAG_PROMPT = ChatPromptTemplate.from_messages(
 
 
 class AIService:
+    """Business logic for AI response"""
     def __init__(self, llm: BaseChatModel):
         self.llm = llm
 
@@ -40,7 +41,15 @@ class AIService:
         question: str,
         documents: List[Document],
     ) -> RAGResult:
+        """Generates answers from LLM for a given question 
 
+        Args:
+            question (str): Question from the document uploaded
+            documents (List[Document]): Reference document objects for generating answers.
+
+        Returns:
+            RAGResult: Response model to store feedback
+        """
         context_blocks = []
         sources = []
 

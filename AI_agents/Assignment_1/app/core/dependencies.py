@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import Depends
-
 from app.core.app_context import create_app_context
 from app.services import DocumentService, AIService, ChatService
 from app.repositories.logs import MessageRepository

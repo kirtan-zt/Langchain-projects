@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.db import get_db
 from app.schemas.document import DocumentRead
 from app.services.document import DocumentService
@@ -12,7 +11,6 @@ from app.core.dependencies import get_document_svc
 from app.models.document import Document
 
 router = APIRouter(prefix="/documents", tags=["documents"])
-
 
 @router.post("/upload", response_model=dict)
 async def upload_document(
@@ -22,6 +20,22 @@ async def upload_document(
     db: AsyncSession = Depends(get_db),
     document_svc: DocumentService = Depends(get_document_svc),
 ):
+    """Upload a document to begin Q&A feature
+
+    Args:
+        name (str, optional): Name of the document.
+        file (UploadFile | None, optional): Media upload class.
+        text (str | None, optional): Allows to insert raw text.
+        db (AsyncSession, optional): Database instance.
+        document_svc (DocumentService, optional): Document service object.
+
+    Raises:
+        HTTPException: Media input validation (pdf, text, etc.)
+        HTTPException: Format of media uploaded
+
+    Returns:
+        Unique Document id of uploaded document
+    """
     if not file and not text:
         raise HTTPException(
             status_code=400,
@@ -79,6 +93,14 @@ async def upload_document(
 async def list_documents(
     db: AsyncSession = Depends(get_db),
 ):
+    """List uploaded documents data
+
+    Args:
+        db (AsyncSession, optional): Database instance.
+
+    Returns:
+        A JSON array of document id and their name.
+    """
     result = await db.execute(
         select(Document)
     )
@@ -90,6 +112,19 @@ async def delete_document(
     db: AsyncSession = Depends(get_db),
     document_svc: DocumentService = Depends(get_document_svc),
 ):
+    """Delete a specific document by id 
+
+    Args:
+        document_id (UUID): Unique document id to delete
+        db (AsyncSession, optional): Database instance.
+        document_svc (DocumentService, optional): Document service class.
+
+    Raises:
+        HTTPException: Document exists validation
+
+    Returns:
+        A JSON object containing confirmation message and deleted document id
+    """
     try:
         await document_svc.delete(db, document_id)
         return {
