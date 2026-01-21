@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "llama-3.3-70b-versatile"
 
      # Vector / NLP settings
+    VECTOR_DB_PATH: str  
     CHUNK_SIZE: int = 1200          
     CHUNK_OVERLAP: int = 250       
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"

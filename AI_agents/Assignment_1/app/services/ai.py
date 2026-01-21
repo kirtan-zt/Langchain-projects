@@ -91,3 +91,16 @@ class AIService:
             sources=list(set(sources)),
             confidence=confidence,
         )
+
+    async def generate_chat_title(self, question: str, answer: str) -> str:
+        prompt = f"""
+        Generate a short 3–6 word title summarizing this conversation.
+
+        Question: {question}
+        Answer: {answer}
+
+        Title:
+        """
+
+        response = await self.llm.ainvoke(prompt)
+        return response.content.strip().strip('"')

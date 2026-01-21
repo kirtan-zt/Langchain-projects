@@ -34,19 +34,22 @@ class ChatService:
         Returns:
             Chat: Dictionary that maps to Chat database 
         """
-        documents = []
+        if not chat_create.document_ids:
+            raise ValueError("At least one document_id is required")
 
-        if chat_create.document_ids:
-            documents = await self.document_svc.get_by_ids(
-            session,
-            chat_create.document_ids,
-            )
+        documents = await self.document_svc.get_by_ids(
+            session=session,
+            document_ids=chat_create.document_ids,
+        )
+
+        if len(documents) != len(chat_create.document_ids):
+            raise ValueError("One or more document_ids are invalid")
 
         chat = Chat(name="New Chat")
         return await self.chat_repository.create(
-        db=session,
-        chat=chat,
-        documents=documents,
+            db=session,
+            chat=chat,
+            documents=documents,
         )
 
     async def find_all_chats(
@@ -116,6 +119,12 @@ class ChatService:
             confidence=rag_result.confidence,
         )
         session.add(ai_msg)
+        if chat.name == "New Chat":
+            title = await self.ai_svc.generate_chat_title(
+                question=message_create.content,
+                answer=rag_result.answer,
+            )
+            chat.name = title
         await session.commit()
         await session.refresh(ai_msg)
 

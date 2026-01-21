@@ -28,6 +28,7 @@ class AppContext:
         self.vector_store = Chroma(
             collection_name=settings.vector_store_collection_name,
             embedding_function=self.embeddings,
+            persist_directory=settings.VECTOR_DB_PATH, 
         )
 
         # Repositories
