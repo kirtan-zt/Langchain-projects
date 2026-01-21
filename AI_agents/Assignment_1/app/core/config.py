@@ -24,7 +24,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     GROQ_API_KEY: str
 
-    # Vector / NLP settings
+    # LLM Configuration, Defaulting to Groq/Llama, but can be overridden in .env
+    LLM_PROVIDER: str = "groq" 
+    LLM_MODEL: str = "llama-3.3-70b-versatile"
+
+     # Vector / NLP settings
     CHUNK_SIZE: int = 1200          
     CHUNK_OVERLAP: int = 250       
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"

@@ -1,5 +1,5 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_groq import ChatGroq
+from langchain.chat_models import init_chat_model
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from app.core.config import settings
@@ -42,10 +42,11 @@ class AppContext:
             text_splitter=self.text_splitter,
         )
 
-        self.llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
+        self.llm = init_chat_model(
+            model=settings.LLM_MODEL,
+            model_provider=settings.LLM_PROVIDER,
             temperature=0,
-            api_key=settings.GROQ_API_KEY,
+            api_key=settings.GROQ_API_KEY
         )
 
         self.ai_svc = AIService(self.llm)
