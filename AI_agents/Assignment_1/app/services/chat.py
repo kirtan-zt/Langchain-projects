@@ -98,6 +98,8 @@ class ChatService:
         )
         session.add(user_msg)
 
+        history = await self.get_chat_history(session, chat_id)
+
         # Retrieve context from documents
         context_docs = await self.document_svc.search(
             query=message_create.content,
@@ -108,6 +110,7 @@ class ChatService:
         rag_result = await self.ai_svc.generate_rag_answer(
             question=message_create.content,
             documents=context_docs,
+            history=history,
         )
 
         # Save AI message
@@ -145,3 +148,21 @@ class ChatService:
             list[Message]: A JSON array of message objects.
         """
         return await self.message_repository.find_by_chat_id(session, chat_id)
+    
+    async def get_chat_history(
+    self,
+    session: AsyncSession,
+    chat_id: UUID,
+    limit: int = 6,
+    ) -> str:
+        messages = await self.message_repository.find_by_chat_id(session, chat_id)
+
+        # last N messages
+        recent = messages[-limit:]
+
+        history = []
+        for msg in recent:
+            role = "User" if msg.sender_type == SenderType.HUMAN else "Assistant"
+            history.append(f"{role}: {msg.content}")
+
+        return "\n".join(history)

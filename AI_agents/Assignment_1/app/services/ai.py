@@ -16,8 +16,8 @@ RAG_PROMPT = ChatPromptTemplate.from_messages(
         (
             "system",
             "You are a company knowledge assistant.\n"
-            "Answer the user's question using ONLY the information provided "
-            "in the context below.\n\n"
+            "Answer the user's question using document context AND conversation history.\n"
+            "Do not hallucinate\n"
             "Rules:\n"
             "- Do NOT use prior knowledge.\n"
             "- If the answer cannot be found, say:\n"
@@ -26,7 +26,12 @@ RAG_PROMPT = ChatPromptTemplate.from_messages(
             "- If multiple sources are used, list them all.\n"
             "- Be concise and factual.\n"
         ),
-        ("human", "Context:\n{context}\n\nQuestion:\n{question}"),
+        (
+            "human",
+            "Conversation history:\n{history}\n\n"
+            "Document context:\n{context}\n\n"
+            "Question:\n{question}",
+        ),
     ]
 )
 
@@ -40,6 +45,7 @@ class AIService:
         self,
         question: str,
         documents: List[Document],
+        history: str,
     ) -> RAGResult:
         """Generates answers from LLM for a given question 
 
@@ -71,6 +77,7 @@ class AIService:
             {
                 "context": context,
                 "question": question,
+                "history": history,
             }
         )
 
