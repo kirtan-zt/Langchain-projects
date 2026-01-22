@@ -9,6 +9,7 @@ This repository contains a **Job Board backend API** built with **FastAPI** and 
 ## System architecture (high level)
 
 ### Core API (CRUD)
+
 - **FastAPI app**: `Major Project Job board API/main.py`
 - **Routers (HTTP endpoints)**: `Major Project Job board API/src/routers/*`
   - Users, companies, job listings, job seekers, recruiters, applications
@@ -23,6 +24,7 @@ This repository contains a **Job Board backend API** built with **FastAPI** and 
     - Allows read-only access for some GET routes (see `BYPASS_MIDDLEWARE_PATHS` in `src/core/config.py`)
 
 ### AI Intelligence Layer (RAG + embeddings + agent)
+
 The AI functionality is exposed under the **AI router**: `Major Project Job board API/src/routers/chatbotRoute.py` (prefix: `/ai`)
 
 - **Vector store**: **PGVector in PostgreSQL** (LangChain integration)
@@ -52,6 +54,7 @@ The AI functionality is exposed under the **AI router**: `Major Project Job boar
 ## Tools used
 
 ### Backend & database
+
 - **FastAPI** (API framework)
 - **Uvicorn** (ASGI server)
 - **SQLModel + SQLAlchemy** (ORM / models)
@@ -60,10 +63,12 @@ The AI functionality is exposed under the **AI router**: `Major Project Job boar
 - **asyncpg** (async Postgres driver)
 
 ### Auth / security
+
 - **JWT** (token-based authentication)
 - **passlib / bcrypt** (password hashing)
 
 ### AI / RAG / Agent stack
+
 - **LangChain** (chains, prompts, agent/tooling)
 - **Groq** (LLM provider via API key; default model is configurable)
 - **HuggingFace embeddings** (sentence-transformers)
@@ -74,6 +79,7 @@ The AI functionality is exposed under the **AI router**: `Major Project Job boar
 ## How to run locally
 
 ### 1) Prerequisites
+
 - **Python 3.10+** recommended
 - **PostgreSQL** running locally
 - **pgvector extension enabled** (required for vector search)
@@ -85,6 +91,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 ### 2) Create and configure the environment
+
 From the repository root:
 
 ```bash
@@ -122,6 +129,7 @@ INTERNAL_SERVICE_TOKEN=OPTIONAL_INTERNAL_TOKEN
 ```
 
 ### 3) Run database migrations (Alembic)
+
 This project includes Alembic migrations in `Major Project Job board API/alembic/`.
 
 **Important:** Alembic reads the DB URL from `Major Project Job board API/alembic.ini` (`sqlalchemy.url`).
@@ -140,10 +148,12 @@ uvicorn main:app --reload
 ```
 
 Then open:
+
 - **Swagger UI**: `http://127.0.0.1:8000/docs`
 - **OpenAPI JSON**: `http://127.0.0.1:8000/openapi.json`
 
 ### 5) (Optional) Seed data + build embeddings
+
 To use RAG / recommendation features meaningfully, ensure you have job listings in Postgres, then sync:
 
 - `POST /ai/sync-embeddings` (syncs all listings into PGVector)
@@ -152,118 +162,9 @@ To use RAG / recommendation features meaningfully, ensure you have job listings 
 ---
 
 ## Key AI endpoints (quick reference)
+
 - **RAG Q&A**: `GET /ai/ask-ai?query=...`
 - **Agent Q&A**: `POST /ai/ask-agent?query=...`
 - **Sync embeddings**: `POST /ai/sync-embeddings`
 - **Job recommendation**: `POST /ai/recommend`
 - **Improve job description**: `POST /ai/improve-description?mode=SHORT|DETAILED|MARKETING`
-
-
-## Demonstration of Agent Executor chain
-
-Testing AI-agent with a question and check the terminal response:
-
-```bash
-  Find out job listings that offer Hybrid mode of work and the salary range is more than 3L
-```
-
-```bash
-> Entering new AgentExecutor chain...
-Thought: Do I need to use a tool? Yes
-Action: vector_job_search
-Action Input: "Hybrid mode of work" and "salary range more than 3L"Role: Mechanical design engineer. Company: Reliance Industries Limited (RIL). Location: modes.on_site. Details: A candidate who has the potential to carry out successful 3D design of a thermal power plant and manage resources carefully
-
-Role: Business Analyst. Company: Google LLC. Location: modes.hybrid. Details: Act as a liaison between business teams, IT, and management, translating needs and validating requirements, Support the design of technical solutions and participate in Quality Assurance (QA) and User Acceptance Testing (UAT).
-
-Role: Senior Backend Developer. Company: Google LLC. Location: modes.hybrid. Details: Strong proficiency in backend languages (e.g., Python, Java, Node.js, C#), Experience with frameworks (e.g., Spring Boot, Express, Django) and DevOps tools (Docker, Kubernetes)Thought: The observation from the previous action provides some job listings that offer Hybrid mode of work, but it does not explicitly mention the salary range for each job listing. To find job listings that offer Hybrid mode of work and a salary range of more than 3L, I need to filter the results based on the salary range.
-
-Action: vector_job_search
-Action Input: "Hybrid mode of work" and "salary range more than 3L" and "job listings with salary information"Role: Business Analyst. Company: Google LLC. Location: modes.hybrid. Details: Act as a liaison between business teams, IT, and management, translating needs and validating requirements, Support the design of technical solutions and participate in Quality Assurance (QA) and User Acceptance Testing (UAT).
-
-Role: Mechanical design engineer. Company: Reliance Industries Limited (RIL). Location: modes.on_site. Details: A candidate who has the potential to carry out successful 3D design of a thermal power plant and manage resources carefully
-
-Role: Senior Backend Developer. Company: Google LLC. Location: modes.hybrid. Details: Strong proficiency in backend languages (e.g., Python, Java, Node.js, C#), Experience with frameworks (e.g., Spring Boot, Express, Django) and DevOps tools (Docker, Kubernetes)Thought: The observation from the previous action still does not provide the salary range for each job listing. To find job listings that offer Hybrid mode of work and a salary range of more than 3L, I need to use a different approach. I can try to list all the jobs and then filter the results based on the location and salary range.
-
-Action: list_jobs
-Action Input: NoneINFO:     Request for POST method started
-INFO:     Response for POST method completed with status code 200 in 0.35s
-INFO:     127.0.0.1:50924 - "POST /users/login HTTP/1.1" 200 OK
-INFO:     Request for GET method started
-INFO:     Response for GET method completed with status code 200 in 0.07s
-INFO:     127.0.0.1:50926 - "GET /listings/ HTTP/1.1" 200 OK
-[{"listing_id": 6, "title": "Database administrator", "Type of work": "Part-Time", "Status": "Still accepting"}, {"listing_id": 7, "title": "Mechanical design engineer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 8, "title": "Senior Frontend Developer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 9, "title": "Senior Backend Developer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 10, "title": "Lead Maintenance Engineer", "Type of work": "Full-Time", "Status": "Still accepting"}]Thought: The observation from the previous action provides a list of job listings, but it does not include information about the location or salary range. To find job listings that offer Hybrid mode of work and a salary range of more than 3L, I need to use a different approach. I can try to use the vector_job_search tool with a more specific query that includes the salary range.
-
-Action: vector_job_search
-Action Input: "Hybrid mode of work" and "salary range more than 3L" and "job listings with salary information"Role: Business Analyst. Company: Google LLC. Location: modes.hybrid. Details: Act as a liaison between business teams, IT, and management, translating needs and validating requirements, Support the design of technical solutions and participate in Quality Assurance (QA) and User Acceptance Testing (UAT).
-
-Role: Mechanical design engineer. Company: Reliance Industries Limited (RIL). Location: modes.on_site. Details: A candidate who has the potential to carry out successful 3D design of a thermal power plant and manage resources carefully
-
-Role: Senior Backend Developer. Company: Google LLC. Location: modes.hybrid. Details: Strong proficiency in backend languages (e.g., Python, Java, Node.js, C#), Experience with frameworks (e.g., Spring Boot, Express, Django) and DevOps tools (Docker, Kubernetes)Thought: It seems that the previous actions did not provide the desired results. The vector_job_search tool is not able to provide job listings with salary information. To find job listings that offer Hybrid mode of work and a salary range of more than 3L, I need to think of a different approach. 
-
-Action: list_jobs
-Action Input: NoneINFO:     Request for GET method started
-INFO:     Response for GET method completed with status code 200 in 0.01s
-INFO:     127.0.0.1:50928 - "GET /listings/ HTTP/1.1" 200 OK
-[{"listing_id": 6, "title": "Database administrator", "Type of work": "Part-Time", "Status": "Still accepting"}, {"listing_id": 7, "title": "Mechanical design engineer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 8, "title": "Senior Frontend Developer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 9, "title": "Senior Backend Developer", "Type of work": "Full-Time", "Status": "Still accepting"}, {"listing_id": 10, "title": "Lead Maintenance Engineer", "Type of work": "Full-Time", "Status": "Still accepting"}]Thought: It seems that the previous actions did not provide the desired results. The vector_job_search tool is not able to provide job listings with salary information, and the list_jobs tool does not provide information about the location or salary range. To find job listings that offer Hybrid mode of work and a salary range of more than 3L, I need to think of a different approach. 
-
-Since the tools provided do not seem to be able to provide the desired results, I will try to analyze the observations from the previous actions. From the observations, I can see that there are some job listings that offer Hybrid mode of work, but the salary range is not explicitly mentioned. 
-
-Action: list_companies
-Action Input: NoneINFO:     Request for GET method started
-INFO:     Response for GET method completed with status code 200 in 0.03s
-INFO:     127.0.0.1:50929 - "GET /companies/ HTTP/1.1" 200 OK
-[{"Company name": "Google LLC", "ID": 11, "Industry": "Information Technology"}, {"Company name": "Reliance Industries Limited (RIL)", "ID": 13, "Industry": "Chemical"}]Thought: Based on the observations from the previous actions, I can see that there are some job listings that offer Hybrid mode of work, but the salary range is not explicitly mentioned. I can try to analyze the job listings that offer Hybrid mode of work and see if I can find any information about the salary range.
-
-Action: vector_job_search
-Action Input: "Hybrid mode of work" and "job listings with salary information"Role: Business Analyst. Company: Google LLC. Location: modes.hybrid. Details: Act as a liaison between business teams, IT, and management, translating needs and validating requirements, Support the design of technical solutions and participate in Quality Assurance (QA) and User Acceptance Testing (UAT).
-
-Role: Senior Backend Developer. Company: Google LLC. Location: modes.hybrid. Details: Strong proficiency in backend languages (e.g., Python, Java, Node.js, C#), Experience with frameworks (e.g., Spring Boot, Express, Django) and DevOps tools (Docker, Kubernetes)
-
-Role: Mechanical design engineer. Company: Reliance Industries Limited (RIL). Location: modes.on_site. Details: A candidate who has the potential to carry out successful 3D design of a thermal power plant and manage resources carefullyThought: Based on the observations from the previous actions, I can see that there are some job listings that offer Hybrid mode of work, but the salary range is not explicitly mentioned. However, I can try to analyze the job listings that offer Hybrid mode of work and see if I can find any information about the salary range. 
-
-From the observations, I can see that the job listings that offer Hybrid mode of work are from companies such as Google LLC. Based on industry standards and market trends, I can infer that the salary range for these job listings is likely to be more than 3L.
-
-Action: None
-Final Answer: Based on the analysis of the job listings that offer Hybrid mode of work, I can provide the following job listings that are likely to have a salary range of more than 3L:
-
-1. Business Analyst at Google LLC - This job listing offers Hybrid mode of work and is likely to have a salary range of more than 3L based on industry standards and market trends.
-2. Senior Backend Developer at Google LLC - This job listing offers Hybrid mode of work and is likely to have a salary range of more than 3L based on industry standards and market trends.
-
-Please note that the salary range is not explicitly mentioned in the job listings, and the inference is based on industry standards and market trends. It is recommended to contact the companies directly to confirm the salary range for these job listings.
-
-> Finished chain.
-INFO:     Response for POST method completed with status code 200 in 13.85s
-INFO:     127.0.0.1:50922 - "POST /ai/ask-agent?query=Find%20out%20job%20listings%20that%20offer%20Hybrid%20mode%20of%20work%20and%20the%20salary%20range%20is%20more%20than%203L HTTP/1.1" 200 OK
-```
-
-### Response body output
-```json
-{
-    "status": "success",
-    "output": "Based on the analysis of the job listings that offer Hybrid mode of work, I can provide the following job listings that are likely to have a salary range of more than 3L:\n\n1. Business Analyst at Google LLC - This job listing offers Hybrid mode of work and is likely to have a salary range of more than 3L based on industry standards and market trends.\n2. Senior Backend Developer at Google LLC - This job listing offers Hybrid mode of work and is likely to have a salary range of more than 3L based on industry standards and market trends.\n\nPlease note that the salary range is not explicitly mentioned in the job listings, and the inference is based on industry standards and market trends. It is recommended to contact the companies directly to confirm the salary range for these job listings."
-}
-```
-
-### Testing the AI Agent with irrelevant questions 
-```bash
-What is the weather in California today?
-```
-
-```bash
-> Entering new AgentExecutor chain...
-Thought: Do I need to use a tool? No
-The tools provided are related to job searching and recruitment, and none of them seem to be relevant to checking the weather in California. 
-
-Final Answer: I'm afraid I'm a Job Board Executive Agent and do not have access to real-time weather information. However, I can suggest checking a weather website or app, such as AccuWeather or Weather.com, for the current weather in California. If you have any job-related questions or need assistance with finding a job, I'd be happy to help!
-
-> Finished chain.
-INFO:     Response for POST method completed with status code 200 in 0.77s
-```
-
-### Response body output
-```json
-{
-    "status": "success",
-    "output": "I'm afraid I'm a Job Board Executive Agent and do not have access to real-time weather information. However, I can suggest checking a weather website or app, such as AccuWeather or Weather.com, for the current weather in California. If you have any job-related questions or need assistance with finding a job, I'd be happy to help!"
-}
-```
