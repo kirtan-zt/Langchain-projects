@@ -35,6 +35,5 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     vector_store_collection_name: str = "knowledge_base"
-    debug: bool = False
 
 settings = Settings()
