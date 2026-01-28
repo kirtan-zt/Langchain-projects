@@ -99,12 +99,16 @@ class ChatService:
         session.add(user_msg)
 
         history = await self.get_chat_history(session, chat_id)
+        document_ids = [doc.id for doc in chat.files]
 
         # Retrieve context from documents
         context_docs = await self.document_svc.search(
             query=message_create.content,
-            file_ids=[doc.id for doc in chat.files],
+            file_ids=document_ids,
+            k=5,
         )
+        if not context_docs:
+            raise ValueError("No relevant content found in the selected documents")
 
         # Generate AI response
         rag_result = await self.ai_svc.generate_rag_answer(
