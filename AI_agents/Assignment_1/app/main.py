@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.core.config import settings
-from app.api.routes import chat, document, logs
+from app.routes import chat, document, logs
 from app.core.db import init_db
 
 def create_application() -> FastAPI:
