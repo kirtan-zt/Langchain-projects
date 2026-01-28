@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from src.models import applications, companies, jobListings, jobSeekers, recruiters, users, metadata
 from src.models import metadata
+from src.models.multi_agent_models import automated_listings, query_extractor, query_validator
 from alembic import context
 from sqlmodel import SQLModel
 
@@ -26,7 +27,17 @@ target_metadata = SQLModel.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
+def include_object(object, name, type_, reflected, compare_to):
+    # 1. Ignore pgvector specific tables
+    ignored_tables = ["langchain_pg_collection", "langchain_pg_embedding"]
+    if type_ == "table" and name in ignored_tables:
+        return False
+    
+    # 2. Ignore the embedding columns specifically
+    if type_ == "column" and name == "embedding":
+        return False
+        
+    return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -69,6 +80,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
+            include_object=include_object,
             version_table_schema=target_metadata.schema, 
             dialect_opts={"paramstyle": "named"},
         )
