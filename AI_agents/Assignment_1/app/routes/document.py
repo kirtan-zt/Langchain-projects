@@ -1,6 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form, status
 from typing import List
-from fastapi.responses import JSONResponse
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,10 +8,11 @@ from app.schemas.document import DocumentRead
 from app.services.document import DocumentService
 from app.core.dependencies import get_document_svc
 from app.models.document import Document
+from app.models.api_response import StandardResponse
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
-@router.post("/upload", response_model=dict)
+@router.post("/upload", response_model=StandardResponse[dict])
 async def upload_document(
     name: str = Form(...),
     file: UploadFile | None = File(default=None),
@@ -53,9 +53,11 @@ async def upload_document(
                 name=name,
                 pdf_bytes=await file.read(),
             )
-            return JSONResponse(
-                content={"document_id": str(saved.id)},
-                status_code=status.HTTP_200_OK,
+            
+            return StandardResponse(
+                status=201,
+                message="PDF uploaded successfully",
+                data={"document_id": str(saved.id)}
             )
 
         # TXT
@@ -66,9 +68,11 @@ async def upload_document(
                 name=name,
                 text=raw_text,
             )
-            return JSONResponse(
-                content={"document_id": str(saved.id)},
-                status_code=status.HTTP_200_OK,
+            
+            return StandardResponse(
+                status=201,
+                message="Text file uploaded successfully",
+                data={"document_id": str(saved.id)}
             )
 
         raise HTTPException(
@@ -83,13 +87,15 @@ async def upload_document(
             name=name,
             text=text,
         )
-        return JSONResponse(
-            content={"document_id": str(saved.id)},
-            status_code=status.HTTP_200_OK,
+        
+        return StandardResponse(
+            status=201,
+            message="Raw text inserted successfully",
+            data={"document_id": str(saved.id)}
         )
 
 
-@router.get("/", response_model=List[DocumentRead])
+@router.get("/", response_model=StandardResponse[List[DocumentRead]])
 async def list_documents(
     db: AsyncSession = Depends(get_db),
 ):
@@ -104,9 +110,14 @@ async def list_documents(
     result = await db.execute(
         select(Document)
     )
-    return result.scalars().all()
+    result_object=result.scalars().all()
+    return StandardResponse(
+        status=200,
+        message="List of documents generated successfully",
+        data=result_object
+    )
 
-@router.delete("/{document_id}")
+@router.delete("/{document_id}", response_model=StandardResponse)
 async def delete_document(
     document_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -127,9 +138,11 @@ async def delete_document(
     """
     try:
         await document_svc.delete(db, document_id)
-        return {
-            "status": "deleted",
-            "document_id": document_id,
-        }
+        
+        return StandardResponse(
+            status=200,
+            message="Document deleted successfully",
+            data=document_id
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
