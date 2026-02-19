@@ -30,8 +30,8 @@ class Settings(BaseSettings):
 
      # Vector / NLP settings
     VECTOR_DB_PATH: str  
-    CHUNK_SIZE: int = 1200          
-    CHUNK_OVERLAP: int = 250       
+    CHUNK_SIZE: int = 1000          
+    CHUNK_OVERLAP: int = 200       
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     vector_store_collection_name: str = "knowledge_base"
